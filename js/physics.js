@@ -62,7 +62,7 @@ export default class Physics {
   }
 
   checkCollision(shape) {
-    return this.checkBottomCollision(shape) || this.checkStackCollision(shape);
+    return !this.canPlace(shape, shape.x, shape.y, shape.matrix);
   }
 
   checkBottomCollision(shape) {
@@ -93,6 +93,52 @@ export default class Physics {
     });
   }
 
+  canPlace(shape, x = shape.x, y = shape.y, matrix = shape.matrix) {
+    for (let row = 0; row < matrix.length; row += 1) {
+      for (let col = 0; col < matrix[row].length; col += 1) {
+        if (!matrix[row][col]) {
+          continue;
+        }
+
+        const cellLeft = x + col * this.blockSize;
+        const cellRight = cellLeft + this.blockSize;
+        const cellTop = y + row * this.blockSize;
+        const cellBottom = cellTop + this.blockSize;
+
+        if (cellLeft < this.boxX || cellRight > this.boxX + this.boxWidth) {
+          return false;
+        }
+
+        if (cellBottom > this.boxY + this.boxHeight) {
+          return false;
+        }
+
+        const gridCol = this.pixelToGridCol(cellLeft + this.blockSize / 2);
+        const gridRow = this.pixelToGridRow(cellBottom - 1);
+
+        if (
+          gridRow >= 0
+          && gridRow < this.rows
+          && gridCol >= 0
+          && gridCol < this.cols
+          && this.stackedGrid[gridRow][gridCol]
+        ) {
+          return false;
+        }
+      }
+    }
+
+    return true;
+  }
+
+  hardDrop(shape) {
+    while (this.canPlace(shape, shape.x, shape.y + 1, shape.matrix)) {
+      shape.y += 1;
+    }
+
+    this.snapToGrid(shape);
+  }
+
   stackShape(shape) {
     const cells = shape.getCells();
 
@@ -120,6 +166,33 @@ export default class Physics {
     });
   }
 
+  clearFullRows() {
+    const remainingRows = this.stackedGrid.filter((row) => (
+      row.some((cell) => !cell)
+    ));
+    const clearedRows = this.rows - remainingRows.length;
+
+    while (remainingRows.length < this.rows) {
+      remainingRows.unshift(Array.from({ length: this.cols }, () => null));
+    }
+
+    this.stackedGrid = remainingRows;
+    return clearedRows;
+  }
+
+  cloneGrid() {
+    return this.stackedGrid.map((row) => (
+      row.map((cell) => (cell ? { ...cell } : null))
+    ));
+  }
+
+  restoreGrid(grid) {
+    this.stackedGrid = grid.map((row) => (
+      row.map((cell) => (cell ? { ...cell } : null))
+    ));
+    this.hasOverflowCells = false;
+  }
+
   checkOverflow() {
     if (this.hasOverflowCells) {
       return true;
@@ -140,7 +213,7 @@ export default class Physics {
 
   snapToGrid(shape) {
     const gridX = Math.round((shape.x - this.boxX) / this.blockSize);
-    const gridY = Math.round((shape.y - this.boxY) / this.blockSize);
+    const gridY = Math.floor((shape.y - this.boxY) / this.blockSize);
 
     shape.x = this.boxX + gridX * this.blockSize;
     shape.y = this.boxY + gridY * this.blockSize;
@@ -186,4 +259,3 @@ export default class Physics {
     this.stackedGrid = this.createEmptyGrid();
   }
 }
-
