@@ -1,0 +1,55 @@
+# OS files
+.DS_Store
+Thumbs.db
+
+# Editor and IDE settings
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# WeChat DevTools local files
+project.private.config.json
+private.*.json
+.wechatide/
+compile_cache/
+
+# Dependencies and generated packages
+node_modules/
+miniprogram_npm/
+
+# Build and release output
+dist/
+build/
+release/
+temp/
+tmp/
+.cache/
+coverage/
+
+# Logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+pnpm-debug.log*
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Large source assets and archives
+*.psd
+*.ai
+*.sketch
+*.fig
+*.aep
+*.blend
+*.zip
+*.rar
+*.7z
+*.tar
+*.tgz
+*.gz
+

@@ -1,0 +1,15 @@
+{
+  "appid": "touristappid",
+  "projectname": "snug_fit",
+  "compileType": "game",
+  "miniprogramRoot": "./",
+  "setting": {
+    "urlCheck": false,
+    "es6": true,
+    "enhance": true,
+    "postcss": true,
+    "minified": true
+  },
+  "condition": {}
+}
+
